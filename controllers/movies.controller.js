@@ -1,6 +1,7 @@
 require("dotenv").config();
 const { v4: uuidv4 } = require("uuid");
 const ddb = require("../db/config/index");
+const parseDBItem = require("../utils/parseDBItem");
 const MoviesController = {
   // GET /api/movies/
   index: async (req, res) => {
@@ -14,12 +15,12 @@ const MoviesController = {
         TableName: "Movies",
       };
       const movies = await ddb.dynamodb.scan(params).promise();
-      if (!movies)
+      if (!movies?.Items)
         return res
           .status(400)
           .json({ success: false, message: "Movies not found" });
-
-      res.status(200).json({ success: true, movies });
+      const result = parseDBItem(movies.Items);
+      res.status(200).json({ success: true, movies: result });
     } catch (error) {
       console.log(error);
       res
@@ -47,6 +48,8 @@ const MoviesController = {
           title,
           thumbnail_url,
           description,
+          createdAt: new Date().toLocaleString(),
+          updatedAt: new Date().toLocaleString(),
         },
         // ReturnValues: "ALL_OLD",
       };
@@ -76,7 +79,6 @@ const MoviesController = {
         TableName: "Movies",
         Key: {
           id: id,
-          title: "title 2",
         },
         ReturnValues: "ALL_OLD",
       };
