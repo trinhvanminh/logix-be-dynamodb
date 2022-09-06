@@ -1,11 +1,8 @@
-const ObjectId = require("bson").ObjectId;
-const Movies = require("../models/movies.model");
-const Rate = require("../models/rate.model");
-const { verify } = require("jsonwebtoken");
 require("dotenv").config();
-
+const { v4: uuidv4 } = require("uuid");
+const ddb = require("../db/config/index");
 const MoviesController = {
-  // GET /
+  // GET /api/movies/
   index: async (req, res) => {
     const authHeader = req.header("Authorization");
     const token = authHeader && authHeader.split(" ")[1];
@@ -13,65 +10,14 @@ const MoviesController = {
     const userId = decoded && decoded.userId;
 
     try {
-      const movies = await Movies.find();
+      const params = {
+        TableName: "Movies",
+      };
+      const movies = await ddb.dynamodb.scan(params).promise();
       if (!movies)
         return res
           .status(400)
           .json({ success: false, message: "Movies not found" });
-
-      if (userId) {
-        // insert my_rate_status
-        const my_rates = await Rate.find({ user_id: userId });
-        const newMovies = JSON.parse(JSON.stringify(movies)).map((movie) => {
-          const my_rate_status = my_rates.find((rate) =>
-            rate.movie_id.equals(movie._id)
-          )?.rate_status;
-          movie.my_rate_status = my_rate_status;
-          return movie;
-        });
-
-        //insert like, dislike, rate
-        const moviesWithMetadata = newMovies.map((movie) => {
-          const getMovieLikeDislikes = async () => {
-            const movie_rates = await Rate.find({
-              movie_id: ObjectId(movie._id),
-            });
-            if (!movie_rates) return movie;
-
-            let like_count = 0;
-            let dislike_count = 0;
-
-            movie_rates.forEach((movie_rate) => {
-              if (movie_rate?.rate_status === 1) like_count++;
-              if (movie_rate?.rate_status === -1) dislike_count++;
-            });
-
-            if (like_count === 0)
-              return {
-                like_count,
-                dislike_count,
-                rate: 0,
-              };
-
-            const rate = parseInt(
-              (like_count / (like_count + dislike_count)) * 5
-            );
-
-            return { like_count, dislike_count, rate };
-          };
-          return getMovieLikeDislikes().then((res) => ({
-            ...movie,
-            ...res,
-          }));
-        });
-
-        const listValues = await Promise.all(moviesWithMetadata);
-
-        return res.status(200).json({
-          success: true,
-          movies: listValues,
-        });
-      }
 
       res.status(200).json({ success: true, movies });
     } catch (error) {
@@ -82,7 +28,7 @@ const MoviesController = {
     }
   },
 
-  // POST /
+  // POST /api/movies/
   createMovie: async (req, res) => {
     const { title, thumbnail_url, description } = req.body;
 
@@ -94,13 +40,25 @@ const MoviesController = {
       });
 
     try {
-      const movie = new Movies({ title, thumbnail_url, description });
-      await movie.save();
-
-      res.json({
-        success: true,
-        message: "Movie created successfully",
-        movie,
+      const params = {
+        TableName: "Movies",
+        Item: {
+          id: uuidv4(),
+          title,
+          thumbnail_url,
+          description,
+        },
+        // ReturnValues: "ALL_OLD",
+      };
+      ddb.client.put(params, (err, data) => {
+        if (err) {
+          console.log("Error", err);
+        } else
+          res.json({
+            success: true,
+            message: "Movie created successfully",
+            movie: data,
+          });
       });
     } catch (error) {
       console.log(error);
@@ -110,44 +68,20 @@ const MoviesController = {
     }
   },
 
-  // PATCH /:id
-  updateMovie: async (req, res) => {
-    const { id } = req.params;
-    const payload = req.body;
-
-    try {
-      //find one and update
-      const movie = await Movies.findOneAndUpdate({ _id: id }, payload, {
-        new: true,
-      });
-
-      if (!movie)
-        return res.status(400).json({
-          success: false,
-          message: "Movie not found",
-        });
-
-      // All good
-      res.json({
-        success: true,
-        message: "Movie updated successfully",
-        movie,
-      });
-    } catch (error) {
-      console.log(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  },
-
-  // DELETE /:id
+  // DELETE /api/movies/:id
   deleteMovie: async (req, res) => {
     const { id } = req.params;
     try {
-      const movie = await Movies.findOneAndDelete({ _id: id });
-
-      if (!movie)
+      const params = {
+        TableName: "Movies",
+        Key: {
+          id: id,
+          title: "title 2",
+        },
+        ReturnValues: "ALL_OLD",
+      };
+      const movie = await ddb.client.delete(params).promise();
+      if (!movie?.Attributes)
         return res.status(400).json({
           success: false,
           message: "Movie not found",
@@ -157,33 +91,7 @@ const MoviesController = {
       res.json({
         success: true,
         message: "Movie deleted successfully",
-        movie,
-      });
-    } catch (error) {
-      console.log(error);
-      res
-        .status(500)
-        .json({ success: false, message: "Internal server error" });
-    }
-  },
-
-  // POST /
-  deleteMoviesWithConditional: async (req, res) => {
-    const payload = req.body;
-    try {
-      const movie = await Movies.deleteMany(payload);
-
-      if (!movie)
-        return res.status(400).json({
-          success: false,
-          message: "Movie not found",
-        });
-
-      // All good
-      res.json({
-        success: true,
-        message: "Movie deleted successfully",
-        movie,
+        movie: movie.Attributes,
       });
     } catch (error) {
       console.log(error);
