@@ -7,8 +7,8 @@ const ddb = require("../../config/index");
     ],
     AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
     ProvisionedThroughput: {
-      ReadCapacityUnits: 10,
-      WriteCapacityUnits: 10,
+      ReadCapacityUnits: 1,
+      WriteCapacityUnits: 1,
     },
   };
 

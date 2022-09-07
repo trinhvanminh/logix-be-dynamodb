@@ -5,6 +5,7 @@ const route = require("./routes/index.route");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+// const morgan = require("morgan");
 const port = process.env.PORT || 5000;
 
 // set body-parse to parse req.body
@@ -14,6 +15,9 @@ app.use(cookieParser());
 
 // set static folder
 app.use(express.static(path.join(__dirname, "public")));
+
+// // https logger
+// app.use(morgan("combined"));
 
 app.use(cors());
 

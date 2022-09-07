@@ -4,12 +4,54 @@ const ddb = require("../../config/index");
     TableName: "Auth",
     KeySchema: [
       { AttributeName: "id", KeyType: "HASH" }, // Partition key
+      // { AttributeName: "email", KeyType: "HASH" }, // Partition key
+      // { AttributeName: "username", KeyType: "RANGE" }, // Sort key
     ],
-    AttributeDefinitions: [{ AttributeName: "id", AttributeType: "S" }],
+    AttributeDefinitions: [
+      { AttributeName: "id", AttributeType: "S" },
+      { AttributeName: "email", AttributeType: "S" },
+      { AttributeName: "username", AttributeType: "S" },
+    ],
     ProvisionedThroughput: {
-      ReadCapacityUnits: 10,
-      WriteCapacityUnits: 10,
+      ReadCapacityUnits: 1,
+      WriteCapacityUnits: 1,
     },
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: "email_index",
+        KeySchema: [
+          {
+            AttributeName: "email",
+            KeyType: "HASH",
+          },
+        ],
+        Projection: {
+          // attributes to project into the index
+          ProjectionType: "ALL", // (ALL | KEYS_ONLY | INCLUDE)
+        },
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1,
+        },
+      },
+      {
+        IndexName: "username_index",
+        KeySchema: [
+          {
+            AttributeName: "username",
+            KeyType: "HASH",
+          },
+        ],
+        Projection: {
+          // attributes to project into the index
+          ProjectionType: "ALL", // (ALL | KEYS_ONLY | INCLUDE)
+        },
+        ProvisionedThroughput: {
+          ReadCapacityUnits: 1,
+          WriteCapacityUnits: 1,
+        },
+      },
+    ],
   };
 
   try {

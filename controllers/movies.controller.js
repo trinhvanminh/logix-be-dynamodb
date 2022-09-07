@@ -71,6 +71,38 @@ const MoviesController = {
     }
   },
 
+  // GET /api/movies/:id
+  getMovie: async (req, res) => {
+    const { id } = req.params;
+    try {
+      const params = {
+        TableName: "Movies",
+        Key: {
+          id: id,
+        },
+        ReturnValues: "ALL_OLD",
+      };
+      const movie = await ddb.client.get(params).promise();
+      if (!movie?.Item)
+        return res.status(400).json({
+          success: false,
+          message: "Movie not found",
+        });
+
+      // All good
+      res.json({
+        success: true,
+        message: "success",
+        movie: movie.Item,
+      });
+    } catch (error) {
+      console.log(error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal server error" });
+    }
+  },
+
   // DELETE /api/movies/:id
   deleteMovie: async (req, res) => {
     const { id } = req.params;
