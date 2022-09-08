@@ -18,7 +18,6 @@ const verifyToken = (req, res, next) => {
 
   try {
     const decoded = verify(token, process.env.JWT_SECRET);
-    console.log(decoded);
     req.userId = decoded.userId;
     next();
   } catch (error) {

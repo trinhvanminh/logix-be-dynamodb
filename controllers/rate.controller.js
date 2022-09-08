@@ -8,7 +8,10 @@ const isExistingRate = async ({ id, user_id, movie_id }) => {
       Key: { id },
     };
     const existedRateById = await ddb.client.get(params).promise();
-    if (existedRateById?.Count > 0) {
+    // if (existedRateById?.Count > 0) {
+    //   return true;
+    // }
+    if (existedRateById?.Item) {
       return true;
     }
   }

@@ -77,6 +77,7 @@ const getUser = async ({ email, username, id }) => {
   }
 };
 
+// /api/auth
 const AuthController = {
   // GET /
   index: async (req, res) => {

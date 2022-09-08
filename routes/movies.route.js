@@ -5,8 +5,8 @@ const { verifyToken } = require("../middlewares/JWT");
 
 // movies/
 router.get("/", MoviesController.index);
-router.post("/", MoviesController.createMovie);
+router.post("/", verifyToken, MoviesController.createMovie);
 router.get("/:id", MoviesController.getMovie);
-router.delete("/:id", MoviesController.deleteMovie);
+router.delete("/:id", verifyToken, MoviesController.deleteMovie);
 
 module.exports = router;
