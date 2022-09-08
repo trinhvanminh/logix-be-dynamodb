@@ -182,6 +182,7 @@ const RateController = {
       const params = {
         TableName: "Rate",
         Key: { id: rate.id },
+        // ConditionExpression: 'attribute_exists(id)',
         UpdateExpression: "set rate_status = :new_rates_tatus",
         ExpressionAttributeValues: {
           ":new_rates_tatus": rate_status,
@@ -235,3 +236,4 @@ const RateController = {
 };
 
 module.exports = RateController;
+module.exports.getRatesByUserIdOrMovieId = getRatesByUserIdOrMovieId;
