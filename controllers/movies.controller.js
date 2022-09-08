@@ -31,10 +31,12 @@ const MoviesController = {
               const my_rate_status = my_rates.find(
                 (rate) => rate.movie_id == movie.id
               )?.rate_status;
-              movie.my_rate_status = my_rate_status;
+              if (my_rate_status) movie.my_rate_status = my_rate_status;
               return movie;
             }
           );
+
+          console.log(newMovies.length);
 
           //insert like, dislike, rate
           const moviesWithMetadata = newMovies.map((movie) => {
@@ -42,12 +44,11 @@ const MoviesController = {
               const movie_rates = await getRatesByUserIdOrMovieId({
                 movie_id: movie.id,
               });
-              if (!movie_rates) return movie;
 
               let like_count = 0;
               let dislike_count = 0;
 
-              movie_rates.forEach((movie_rate) => {
+              movie_rates?.forEach((movie_rate) => {
                 if (movie_rate?.rate_status >= 1) like_count++;
                 if (movie_rate?.rate_status <= -1) dislike_count++;
               });
