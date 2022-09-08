@@ -118,6 +118,12 @@ const RateController = {
         message: "Please check your input",
       });
 
+    if (!user_id)
+      return res.status(400).json({
+        success: false,
+        message: "check your token",
+      });
+
     try {
       // check is existing rate
       const isExistedRate = await isExistingRate({
@@ -178,30 +184,52 @@ const RateController = {
 
     try {
       const rate = await getDetailRate({ user_id, movie_id });
-      console.log(rate);
-      const params = {
-        TableName: "Rate",
-        Key: { id: rate.id },
-        // ConditionExpression: 'attribute_exists(id)',
-        UpdateExpression: "set rate_status = :new_rates_tatus",
-        ExpressionAttributeValues: {
-          ":new_rates_tatus": rate_status,
-        },
-      };
-
-      const updatedRate = await ddb.client.update(params).promise();
-      if (!updatedRate)
-        return res.status(400).json({
-          success: false,
-          message: "Rate not found",
+      if (!rate) {
+        // create new rate
+        const createParams = {
+          TableName: "Rate",
+          Item: { id: uuidv4(), user_id: req.userId, movie_id, rate_status },
+        };
+        ddb.client.put(createParams, (err, rate) => {
+          if (err) {
+            console.error(err);
+            return res.status(400).json({
+              success: false,
+              message: "Failed to create rate",
+              error: err,
+            });
+          }
+          res.json({
+            success: true,
+            message: "Rate created successfully",
+            rate,
+          });
         });
+      } else {
+        const params = {
+          TableName: "Rate",
+          Key: { id: rate.id },
+          // ConditionExpression: 'attribute_exists(id)',
+          UpdateExpression: "set rate_status = :new_rates_tatus",
+          ExpressionAttributeValues: {
+            ":new_rates_tatus": rate_status,
+          },
+        };
 
-      // All good
-      res.json({
-        success: true,
-        message: "Rate created/updated successfully",
-        rate: updatedRate,
-      });
+        const updatedRate = await ddb.client.update(params).promise();
+        if (!updatedRate)
+          return res.status(400).json({
+            success: false,
+            message: "Rate not found",
+          });
+
+        // All good
+        res.json({
+          success: true,
+          message: "Rate created/updated successfully",
+          rate: updatedRate,
+        });
+      }
     } catch (error) {
       console.log(error);
       res

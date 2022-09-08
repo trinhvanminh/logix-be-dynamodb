@@ -25,57 +25,59 @@ const MoviesController = {
       if (userId) {
         // insert my_rate_status
         const my_rates = await getRatesByUserIdOrMovieId({ user_id: userId });
-        const newMovies = JSON.parse(JSON.stringify(moviesItems)).map(
-          (movie) => {
-            const my_rate_status = my_rates.find(
-              (rate) => (rate.movie_id = movie.id)
-            )?.rate_status;
-            movie.my_rate_status = my_rate_status;
-            return movie;
-          }
-        );
+        if (my_rates) {
+          const newMovies = JSON.parse(JSON.stringify(moviesItems)).map(
+            (movie) => {
+              const my_rate_status = my_rates.find(
+                (rate) => rate.movie_id == movie.id
+              )?.rate_status;
+              movie.my_rate_status = my_rate_status;
+              return movie;
+            }
+          );
 
-        //insert like, dislike, rate
-        const moviesWithMetadata = newMovies.map((movie) => {
-          const getMovieLikeDislikes = async () => {
-            const movie_rates = await getRatesByUserIdOrMovieId({
-              movie_id: movie.id,
-            });
-            if (!movie_rates) return movie;
+          //insert like, dislike, rate
+          const moviesWithMetadata = newMovies.map((movie) => {
+            const getMovieLikeDislikes = async () => {
+              const movie_rates = await getRatesByUserIdOrMovieId({
+                movie_id: movie.id,
+              });
+              if (!movie_rates) return movie;
 
-            let like_count = 0;
-            let dislike_count = 0;
+              let like_count = 0;
+              let dislike_count = 0;
 
-            movie_rates.forEach((movie_rate) => {
-              if (movie_rate?.rate_status >= 1) like_count++;
-              if (movie_rate?.rate_status <= -1) dislike_count++;
-            });
+              movie_rates.forEach((movie_rate) => {
+                if (movie_rate?.rate_status >= 1) like_count++;
+                if (movie_rate?.rate_status <= -1) dislike_count++;
+              });
 
-            if (like_count === 0)
-              return {
-                like_count,
-                dislike_count,
-                rate: 0,
-              };
+              if (like_count === 0)
+                return {
+                  like_count,
+                  dislike_count,
+                  rate: 0,
+                };
 
-            const rate = parseInt(
-              (like_count / (like_count + dislike_count)) * 5
-            );
+              const rate = parseInt(
+                (like_count / (like_count + dislike_count)) * 5
+              );
 
-            return { like_count, dislike_count, rate };
-          };
-          return getMovieLikeDislikes().then((res) => ({
-            ...movie,
-            ...res,
-          }));
-        });
+              return { like_count, dislike_count, rate };
+            };
+            return getMovieLikeDislikes().then((res) => ({
+              ...movie,
+              ...res,
+            }));
+          });
 
-        const listValues = await Promise.all(moviesWithMetadata);
+          const listValues = await Promise.all(moviesWithMetadata);
 
-        return res.status(200).json({
-          success: true,
-          movies: listValues,
-        });
+          return res.status(200).json({
+            success: true,
+            movies: listValues,
+          });
+        }
       }
 
       res.status(200).json({ success: true, movies: moviesItems });
