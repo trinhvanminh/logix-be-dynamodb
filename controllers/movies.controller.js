@@ -47,8 +47,8 @@ const MoviesController = {
             let dislike_count = 0;
 
             movie_rates.forEach((movie_rate) => {
-              if (movie_rate?.rate_status === 1) like_count++;
-              if (movie_rate?.rate_status === -1) dislike_count++;
+              if (movie_rate?.rate_status >= 1) like_count++;
+              if (movie_rate?.rate_status <= -1) dislike_count++;
             });
 
             if (like_count === 0)
