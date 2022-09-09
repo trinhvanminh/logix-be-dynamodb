@@ -18,12 +18,13 @@ router.patch(
 
 // auth/ by passport oauth2
 
-const CLIENT_URL = process.env.FE_DOMAIN || "http://localhost:3000";
+const CLIENT_URL = process.env.FE_DOMAIN_V2 || "http://localhost:3000";
 
 // frontend class this to check is authenticated
 router.get("/login/success", (req, res) => {
   console.log("================================================");
   console.log(req);
+  console.log(req.user);
   console.log("================================================");
 
   return res.status(200).json({
