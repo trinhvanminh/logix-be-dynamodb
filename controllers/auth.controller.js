@@ -350,8 +350,10 @@ const AuthController = {
   }),
 
   //GET /google
+  // all api --> https://developers.google.com/identity/protocols/oauth2/openid-connect#re-consent
   google: passport.authenticate("google", {
     scope: ["profile", "email"],
+    prompt: "consent", //none | consent | select_account
   }),
 
   //GET /logout
