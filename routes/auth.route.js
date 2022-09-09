@@ -22,15 +22,12 @@ const CLIENT_URL = process.env.FE_DOMAIN_V2 || "http://localhost:3000";
 
 // frontend class this to check is authenticated
 router.get("/login/success", (req, res) => {
-  console.log("================================================");
   console.log(req);
-  console.log(req.user);
-  console.log("================================================");
-
   return res.status(200).json({
     success: true,
     message: "success",
     user: req.user,
+    authenticated: req.isAuthenticated(),
     // cookies: req.user
   });
 });
@@ -58,9 +55,14 @@ router.get(
   })
 );
 
-router.get("/logout", (req, res) => {
-  req.logout();
-  res.redirect(CLIENT_URL);
+//---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
+router.get("/logout", function (req, res, next) {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect(CLIENT_URL);
+  });
 });
 
 module.exports = router;
