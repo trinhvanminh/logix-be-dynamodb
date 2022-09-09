@@ -25,7 +25,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback",
+      // callbackURL: "/api/auth/google/callback",
+      callbackURL:
+        "https://logix-film-v2.herokuapp.com/api/auth/google/callback",
       passReqToCallback: true,
     },
     async (request, accessToken, refreshToken, profile, done) => {
