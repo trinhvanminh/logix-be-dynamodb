@@ -3,7 +3,6 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
 const { verifyToken } = require("../middlewares/JWT");
-const passport = require("passport");
 
 // auth/
 router.get("/", verifyToken, authController.index);
@@ -16,53 +15,19 @@ router.patch(
   authController.confirmResetPassword
 );
 
-// auth/ by passport oauth2
-
-const CLIENT_URL = process.env.FE_DOMAIN_V2 || "http://localhost:3000";
+// ================= oauth2 =================
 
 // frontend class this to check is authenticated
-router.get("/login/success", (req, res) => {
-  console.log(req);
-  return res.status(200).json({
-    success: true,
-    message: "success",
-    user: req.user,
-    authenticated: req.isAuthenticated(),
-    // cookies: req.user
-  });
-});
+router.get("/login/success", authController.loginSuccess);
 
-router.get("/login/failure", (req, res) => {
-  res.status(401).json({
-    success: false,
-    message: "Unauthorized",
-  });
-});
+router.get("/login/failure", authController.loginFailure);
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    successRedirect: CLIENT_URL,
-    failureRedirect: "/login/failure",
-  })
-);
+router.get("/google/callback", authController.googleCallback);
 
 // ---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
+router.get("/google", authController.google);
 
 //---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
-router.get("/logout", function (req, res, next) {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect(CLIENT_URL);
-  });
-});
+router.get("/logout", authController.logoutOauth);
 
 module.exports = router;

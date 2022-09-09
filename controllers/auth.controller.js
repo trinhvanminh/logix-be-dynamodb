@@ -4,6 +4,7 @@ const { createTokens } = require("../middlewares/JWT");
 const nodeMailer = require("nodemailer");
 const { sendResetPasswordEmail } = require("../helpers/mails.helper");
 const ddb = require("../db/config/index");
+const passport = require("passport");
 
 const isExistingUser = async (email, username) => {
   const checkExistedEmailParams = {
@@ -136,6 +137,7 @@ const AuthController = {
         success: true,
         message: "User logged in successfully",
         accessToken,
+        user,
       });
     } catch (error) {
       console.log(error);
@@ -314,6 +316,52 @@ const AuthController = {
         message: "Something went wrong",
       });
     }
+  },
+
+  //================ oauth2 =======================
+
+  //GET /login/success
+  loginSuccess: (req, res) => {
+    console.log(req.user);
+    if (req.isAuthenticated()) {
+      const accessToken = createTokens(req.user.id);
+      res.json({
+        success: true,
+        message: "User logged in successfully",
+        accessToken,
+        user: req.user,
+        // cookies: req.user
+      });
+    }
+  },
+
+  //GET /login/failure
+  loginFailure: (req, res) => {
+    res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  },
+
+  //GET /google/callback
+  googleCallback: passport.authenticate("google", {
+    successRedirect: process.env.FE_DOMAIN_V2 || "http://localhost:3000",
+    failureRedirect: "/login/failure",
+  }),
+
+  //GET /google
+  google: passport.authenticate("google", {
+    scope: ["profile", "email"],
+  }),
+
+  //GET /logout
+  logoutOauth: (req, res, next) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(process.env.FE_DOMAIN_V2 || "http://localhost:3000");
+    });
   },
 };
 

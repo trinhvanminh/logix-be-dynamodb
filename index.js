@@ -1,5 +1,5 @@
 require("dotenv").config();
-require("./oauth2/config/index");
+require("./oauth2/config");
 const express = require("express");
 const app = express();
 const route = require("./routes/index.route");
@@ -27,7 +27,7 @@ app.use(
   session({
     secret: "keyboard cat",
     resave: false, // false -> don't save session if unmodified
-    saveUninitialized: false, // false -> don't create session until something stored
+    saveUninitialized: true, // false -> don't create session until something stored
     // cookie: { maxAge: 60 * 60 * 24 * 1000, secure: true },
     cookie: { maxAge: 60 * 60 * 24 * 1000, secure: false },
   })
