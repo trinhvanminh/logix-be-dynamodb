@@ -37,7 +37,7 @@ app.use(passport.session());
 
 app.use(
   cors({
-    origin: process.env.SERVER_DOMAIN || "http://localhost:3000",
+    origin: process.env.FE_DOMAIN_V2 || "http://localhost:3000",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
