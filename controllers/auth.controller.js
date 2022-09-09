@@ -325,7 +325,7 @@ const AuthController = {
     console.log(req.user);
     if (req.isAuthenticated()) {
       const accessToken = createTokens(req.user.id);
-      res.json({
+      res.status(200).json({
         success: true,
         message: "User logged in successfully",
         accessToken,
@@ -333,6 +333,12 @@ const AuthController = {
         // cookies: req.user
       });
     }
+    res.status(400).json({
+      success: false,
+      message: "Something went wrong",
+      user: req.user,
+      authenticated: req.isAuthenticated(),
+    });
   },
 
   //GET /login/failure
