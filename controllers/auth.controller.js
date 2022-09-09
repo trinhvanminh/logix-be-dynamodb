@@ -325,7 +325,7 @@ const AuthController = {
     console.log(req.user);
     if (req.isAuthenticated()) {
       const accessToken = createTokens(req.user.id);
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: "User logged in successfully",
         accessToken,
