@@ -333,10 +333,9 @@ const AuthController = {
         // cookies: req.user
       });
     }
-    res.status(400).json({
+    res.status(200).json({
       success: false,
-      message: "Something went wrong",
-      user: req.user,
+      message: "oauth2 - user is not authenticated",
       authenticated: req.isAuthenticated(),
     });
   },
