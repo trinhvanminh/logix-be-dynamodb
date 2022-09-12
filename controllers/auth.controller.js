@@ -250,7 +250,6 @@ const AuthController = {
           .status(400)
           .json({ success: false, message: "User not found" });
 
-      console.log(user);
       const accessToken = createTokens(user.id);
       const result = await sendResetPasswordEmail({
         toUser: email,
@@ -348,6 +347,16 @@ const AuthController = {
     });
   },
 
+  //GET /logout
+  logoutOauth: (req, res, next) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect(process.env.FE_DOMAIN_V2 || "http://localhost:3000");
+    });
+  },
+
   //GET /google/callback
   googleCallback: passport.authenticate("google", {
     successRedirect: process.env.FE_DOMAIN_V2 || "http://localhost:3000",
@@ -361,15 +370,20 @@ const AuthController = {
     prompt: "consent", //none | consent | select_account
   }),
 
-  //GET /logout
-  logoutOauth: (req, res, next) => {
-    req.logout((err) => {
-      if (err) {
-        return next(err);
-      }
-      res.redirect(process.env.FE_DOMAIN_V2 || "http://localhost:3000");
-    });
-  },
+  //GET /facebook/callback
+  facebookCallback: passport.authenticate("facebook", {
+    successRedirect: process.env.FE_DOMAIN_V2 || "http://localhost:3000",
+    failureRedirect: "/login/failure",
+  }),
+
+  //GET /facebook
+  // https://developers.facebook.com/docs/facebook-login/guides/advanced/re-authentication
+  // https://developers.facebook.com/docs/facebook-login/guides/advanced/manual-flow/
+  // 2. De-authorize the user from your Facebook application --> https://stackoverflow.com/questions/12873960/passport-js-facebook-strategy-logout-issue
+  facebook: passport.authenticate("facebook", {
+    // authType: "reauthenticate", // reauthenticate --> login every time
+    // authNonce: "foo123", // reauthenticate && authNonce --> login in first time ??
+  }),
 };
 
 module.exports = AuthController;

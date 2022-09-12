@@ -28,8 +28,8 @@ app.use(
     secret: "keyboard cat",
     resave: false, // false -> don't save session if unmodified
     saveUninitialized: true, // false -> don't create session until something stored
-    cookie: { maxAge: 60 * 60 * 24 * 1000, secure: true },
-    // cookie: { maxAge: 60 * 60 * 24 * 1000, secure: false },
+    // cookie: { maxAge: 60 * 60 * 24 * 1000, secure: true },
+    cookie: { maxAge: 60 * 60 * 24 * 1000, secure: false },
   })
 );
 app.use(passport.initialize());

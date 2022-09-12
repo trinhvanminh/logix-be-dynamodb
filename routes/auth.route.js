@@ -22,12 +22,17 @@ router.get("/login/success", authController.loginSuccess);
 
 router.get("/login/failure", authController.loginFailure);
 
+//---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
+router.get("/logout", authController.logoutOauth);
+
 router.get("/google/callback", authController.googleCallback);
 
 // ---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
 router.get("/google", authController.google);
 
-//---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
-router.get("/logout", authController.logoutOauth);
+router.get("/facebook/callback", authController.facebookCallback);
+
+// ---- note: not using fetch, axios to get this ===> using [a href] to get this router ------------
+router.get("/facebook", authController.facebook);
 
 module.exports = router;

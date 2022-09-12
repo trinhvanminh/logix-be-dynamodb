@@ -11,7 +11,6 @@ const MoviesController = {
     const token = authHeader && authHeader.split(" ")[1];
     const decoded = token && verify(token, process.env.JWT_SECRET);
     const userId = decoded && decoded.userId;
-
     try {
       const params = {
         TableName: "Movies",
