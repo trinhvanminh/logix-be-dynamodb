@@ -35,9 +35,16 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// app.use(
+//   cors({
+//     origin: "*" || process.env.FE_DOMAIN_V2 || "http://localhost:3000",
+//     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: process.env.FE_DOMAIN_V2 || "http://localhost:3000",
+    origin: "*",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   })
